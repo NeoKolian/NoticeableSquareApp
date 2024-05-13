@@ -8,41 +8,37 @@
 import SwiftUI
 
 struct ContentView: View {
-    let height = UIScreen.main.bounds.height / 4
+    let colors: [Color] = [.white, .pink, .yellow, .black]
+    let colorHeight = UIScreen.main.bounds.height / 4
     @GestureState var position: CGPoint = .zero
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                Color(UIColor(.white))
-                    .frame(height: height)
-                Color(UIColor(.pink))
-                    .frame(height: height)
-                Color(UIColor(.yellow))
-                    .frame(height: height)
-                Color(UIColor(.black))
-                    .frame(height: height)
+                ForEach(colors, id: \.self) { color in
+                    color.frame(height: colorHeight)
+                }
             }
-            VStack(spacing: 0) {
-                Color(UIColor(.black))
-                    .frame(height: height)
-                Color(UIColor(.white))
-                    .frame(height: height)
-                Color(UIColor(.black))
-                    .frame(height: height)
-                Color(UIColor(.white))
-                    .frame(height: height)
+            .overlay {
+                ZStack {
+                    VStack(spacing: 0) {
+                        ForEach(0..<4) { index in
+                            let color = index % 2 == 0 ? Color.black : Color.white
+                            color.frame(height: colorHeight)
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+                    .offset(x: position.x, y: position.y)
+                    .gesture(
+                        DragGesture()
+                            .updating($position, body: { current, state, transaction in
+                                state = .init(x: current.translation.width, y: current.translation.height)
+                                transaction.isContinuous = true
+                            })
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
             }
-            .frame(width: 100, height: 100)
-            .offset(x: position.x, y: position.y)
-            .gesture(
-                DragGesture()
-                    .updating($position, body: { current, state, transaction in
-                        state = .init(x: current.translation.width, y: current.translation.height)
-                        transaction.isContinuous = true
-                    })
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
 }
