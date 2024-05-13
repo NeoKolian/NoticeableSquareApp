@@ -8,37 +8,32 @@
 import SwiftUI
 
 struct ContentView: View {
-    let colors: [Color] = [.white, .pink, .yellow, .black]
-    let colorHeight = UIScreen.main.bounds.height / 4
-    @GestureState var position: CGPoint = .zero
+    private let colors: [Color] = [.white, .pink, .yellow, .black]
+    @State private var startPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
     
     var body: some View {
         ZStack {
-            VStack(spacing: 0) {
+            VStack(spacing: .zero) {
                 ForEach(colors, id: \.self) { color in
-                    color.frame(height: colorHeight)
+                    color
                 }
-            }
-            .overlay {
-                ZStack {
-                    VStack(spacing: 0) {
-                        ForEach(0..<4) { index in
-                            let color = index % 2 == 0 ? Color.black : Color.white
-                            color.frame(height: colorHeight)
+            }.ignoresSafeArea()
+            
+            let rectangle = RoundedRectangle(cornerRadius: 15)
+                .frame(width: 100, height: 100)
+                .position(startPosition)
+                .gesture(
+                    DragGesture()
+                        .onChanged { gesture in
+                            self.startPosition = gesture.location
                         }
-                    }
-                    .frame(width: 100, height: 100)
-                    .offset(x: position.x, y: position.y)
-                    .gesture(
-                        DragGesture()
-                            .updating($position, body: { current, state, transaction in
-                                state = .init(x: current.translation.width, y: current.translation.height)
-                                transaction.isContinuous = true
-                            })
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                }
-            }
+                )
+            
+            rectangle.foregroundColor(.white)
+                .blendMode(.difference)
+                .overlay(rectangle.blendMode(.hue))
+                .overlay(rectangle.foregroundColor(.white).blendMode(.overlay))
+                .overlay(rectangle.foregroundColor(.black).blendMode(.overlay))
         }
     }
 }
